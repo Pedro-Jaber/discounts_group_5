@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 public class DiscountService {
 
+
+
     public void applyDiscount(Order order) {
         if (order.getItemCount() >= 20) {  // 1ª decisão
             order.applyDiscount(order.getTotalAmount() * 0.15);
@@ -19,11 +21,10 @@ public class DiscountService {
         LocalDate today = LocalDate.now();
         LocalDate promoStart = LocalDate.of(today.getYear(), 12, 1);
         LocalDate promoEnd = LocalDate.of(today.getYear(), 12, 31);
-        if (!today.isBefore(promoStart) && !today.isAfter(promoEnd)) {  // 4ª decisão
-            if (order.getItemCount() > 5 && !order.isLoyaltyMember()) {  // 5ª e 6ª decisões (&&)
-                order.applyDiscount(order.getTotalAmount() * 0.05);
-            }
-        }
+
+        applyDiscountDuringPromotionPeriod(order, today, promoStart, promoEnd);
+
+
 
         // Verificação de código de cupom
         if (order.hasCoupon()) {  // 7ª decisão
@@ -32,6 +33,18 @@ public class DiscountService {
                 order.applyDiscount(order.getTotalAmount() * 0.20);
             } else if ("NEWYEAR".equals(coupon)) {  // 9ª decisão
                 order.applyDiscount(order.getTotalAmount() * 0.10);
+            }
+        }
+    }
+
+    private boolean isInPromotionPeriod (LocalDate today, LocalDate promoStart, LocalDate promoEnd) {
+        return !today.isBefore(promoStart) && !today.isAfter(promoEnd);
+    }
+
+    public void applyDiscountDuringPromotionPeriod(Order order, LocalDate today, LocalDate promoStart, LocalDate promoEnd) {
+        if (isInPromotionPeriod(today, promoStart, promoEnd)) {  // 4ª decisão
+            if (order.getItemCount() > 5 && !order.isLoyaltyMember()) {  // 5ª e 6ª decisões (&&)
+                order.applyDiscount(order.getTotalAmount() * 0.05);
             }
         }
     }
