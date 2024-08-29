@@ -1,3 +1,10 @@
+# Discounts Grupo 5
+Gabriel bomfim
+Henrique Beltrami
+Pedro Henrique Carvalho
+Pedro Henrique Jaber
+Robert martins
+
 # Nova Regra de Negócio para o Sistema de Pedidos
   ## Desconto Baseado na Quantidade de Itens:
      - Se o pedido tiver 20 ou mais itens:
