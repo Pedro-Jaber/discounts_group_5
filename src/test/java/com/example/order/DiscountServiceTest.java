@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DiscountServiceTest {
     private final DiscountService discountService = new DiscountService();
@@ -39,13 +40,91 @@ class DiscountServiceTest {
     }
 
     @Test
-    void testApplyDiscount_DuringPromotionPeriod() {
+    void testApplyDiscount_DuringPromotionPeriod_wrong() {
         Order order = new Order("Mary Doe", false, 6, 100.0, null);
         LocalDate today = LocalDate.now();
         if (!today.isBefore(LocalDate.of(today.getYear(), 12, 1)) && !today.isAfter(LocalDate.of(today.getYear(), 12, 31))) {
             discountService.applyDiscount(order);
             assertEquals(95.0, order.getTotalAmount());  // 5% desconto durante promoção
         }
+    }
+
+    @Test
+    void testApplyDiscount_DuringPromotionPeriod() {
+        Order order = new Order("Teste Foda", false, 6, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.minusDays(5);
+        LocalDate promoEnd = day.plusDays(5);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(95, order.getTotalAmount());  // 5% desconto durante promoção
+    }
+
+    @Test
+    void testNotApplyDiscount_BeforePromotionPeriod() {
+        Order order = new Order("Teste Foda", false, 6, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.plusDays(2);
+        LocalDate promoEnd = day.plusDays(5);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(100, order.getTotalAmount());
+    }
+
+    @Test
+    void testNotApplyDiscount_AfterPromotionPeriod() {
+        Order order = new Order("Teste Foda", false, 6, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.minusDays(5);
+        LocalDate promoEnd = day.minusDays(2);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(100, order.getTotalAmount());
+    }
+
+    @Test
+    void testApplyDiscount_DuringPromotionPeriod_isLoyaltyMember() {
+        Order order = new Order("Teste Foda", true, 6, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.minusDays(5);
+        LocalDate promoEnd = day.plusDays(5);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(100, order.getTotalAmount());  // não recebe 5% desconto durante promoção se for membro
+    }
+
+    @Test
+    void testApplyDiscount_DuringPromotionPeriod_LessThanFiveItems() {
+        Order order = new Order("Teste Foda", false, 4, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.minusDays(5);
+        LocalDate promoEnd = day.plusDays(5);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(100, order.getTotalAmount());  // não recebe 5% desconto durante promoção se for membro
+    }
+
+    @Test
+    void testApplyDiscount_DuringPromotionPeriod_EqualToFiveItems() {
+        Order order = new Order("Teste Foda", false, 5, 100.0, null);
+
+        LocalDate day = LocalDate.now();
+        LocalDate promoStart = day.minusDays(5);
+        LocalDate promoEnd = day.plusDays(5);
+
+        discountService.applyDiscountDuringPromotionPeriod(order, day, promoStart, promoEnd);
+
+        assertEquals(100, order.getTotalAmount());  // não recebe 5% desconto durante promoção se for membro
     }
 
     @Test
@@ -68,4 +147,6 @@ class DiscountServiceTest {
         discountService.applyDiscount(order);
         assertEquals(100.0, order.getTotalAmount());  // Sem desconto
     }
+
+
 }
